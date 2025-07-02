@@ -1,25 +1,21 @@
-import logo from './logo.svg';
-import './App.css';
+import { FormProvider } from './context/FormContext';
+import FormProgress from './components/FormProgress';
+import FormStep from './components/FormStep';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <FormProvider>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-md mx-auto bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden p-8">
+          <h1 className="text-3xl font-bold text-center text-gray-800 dark:text-white mb-8">
+            Sign Up
+          </h1>
+          <FormProgress />
+          <FormStep />
+        </div>
+      </div>
+    </FormProvider>
   );
-}
+};
 
 export default App;
