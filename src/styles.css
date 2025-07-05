@@ -2,13 +2,22 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Dark Mode transitions */
+
+html {
+  @apply transition-colors duration-300;
+}
+
 /* Toggle switch styles */
-.toggle-checkbox {
-  position: absolute;
+.toggle-checkbox:checked {
+  /* position: absolute;
   opacity: 0;
   cursor: pointer;
   height: 0;
-  width: 0;
+  width: 0; */
+  right: 0;
+  border-color: #3b82f6;
+  transform: translateX(100%);
 }
 
 .toggle-label {
@@ -34,7 +43,7 @@
 }
 
 .toggle-checkbox:checked + .toggle-label {
-  background: #3b82f6;
+  background-color: #3b82f6;
 }
 
 .toggle-checkbox:checked + .toggle-label:after {
@@ -71,4 +80,25 @@
 
 .dark body {
   @apply bg-gray-900 text-gray-100;
+}
+
+/* Form elements */
+input, select, textarea, button {
+  @apply transition-colors duration-200;
+}
+
+/* Dark mode scrollbar */
+@media (prefers-color-scheme: dark) {
+  .dark ::-webkit-scrollbar {
+    width: 12px;
+  }
+  
+  .dark ::-webkit-scrollbar-track {
+    background: #1f2937;
+  }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    background: #4b5563;
+    border-radius: 6px;
+  }
 }

@@ -1,6 +1,5 @@
 import { useContext } from 'react';
 import { FormContext } from '../context/FormContext';
-import { validateEmail, validatePassword } from '../utils/validation';
 
 const FormStep = () => {
   const { 
@@ -22,6 +21,27 @@ const FormStep = () => {
     'Hindi', 'English', 'Spanish', 'French', 
     'German', 'Chinese', 'Japanese'
   ];
+
+  // Validation functions
+  const validateEmail = (email) => {
+    const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return re.test(email);
+  };
+
+  const validatePassword = (password) => {
+    // Minimum 8 chars, at least 1 letter, 1 number and 1 special char
+    const re = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{6,}$/;
+    return re.test(password);
+  };
+
+  const getPasswordError = (password) => {
+    if (!password) return 'Password is required';
+    if (password.length < 6) return 'Minimum 6 characters required';
+    if (!/[A-Za-z]/.test(password)) return 'At least one letter required';
+    if (!/\d/.test(password)) return 'At least one number required';
+    if (!/[@$!%*#?&]/.test(password)) return 'At least one special character (@$!%*#?&) required';
+    return '';
+  };
 
   const validateStep = () => {
     switch(step) {
@@ -46,16 +66,17 @@ const FormStep = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateStep()) {
-      nextStep();
-    }
+    if (validateStep()) nextStep();
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Step 1: Basic Information */}
       {step === 1 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Basic Information</h2>
+          
+          {/* Full Name */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1" htmlFor="fullName">
               Full Name *
@@ -70,6 +91,8 @@ const FormStep = () => {
               required
             />
           </div>
+          
+          {/* Email */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1" htmlFor="email">
               Email *
@@ -87,9 +110,11 @@ const FormStep = () => {
               <p className="text-red-500 text-sm mt-1">Please enter a valid email address</p>
             )}
           </div>
+          
+          {/* Password */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1" htmlFor="password">
-              Password (min 6 characters) *
+              Password *
             </label>
             <input
               type="password"
@@ -99,18 +124,22 @@ const FormStep = () => {
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               required
-              minLength="6"
             />
             {formData.password && !validatePassword(formData.password) && (
-              <p className="text-red-500 text-sm mt-1">Password must be at least 6 characters</p>
+              <div className="text-red-500 text-sm mt-1">
+                {getPasswordError(formData.password)}
+              </div>
             )}
           </div>
         </div>
       )}
 
+      {/* Step 2: Profile Details */}
       {step === 2 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Profile Details</h2>
+          
+          {/* Date of Birth */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1" htmlFor="dob">
               Date of Birth *
@@ -121,10 +150,13 @@ const FormStep = () => {
               name="dob"
               value={formData.dob}
               onChange={handleChange}
+              max={new Date().toISOString().split('T')[0]}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
               required
             />
           </div>
+          
+          {/* Gender */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">
               Gender *
@@ -138,7 +170,7 @@ const FormStep = () => {
                     value={gender}
                     checked={formData.gender === gender}
                     onChange={handleChange}
-                    className="text-blue-500"
+                    className="text-blue-500 focus:ring-blue-500"
                     required
                   />
                   <span className="text-gray-700 dark:text-gray-300">{gender}</span>
@@ -146,6 +178,8 @@ const FormStep = () => {
               ))}
             </div>
           </div>
+          
+          {/* Country */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1" htmlFor="country">
               Country *
@@ -167,33 +201,35 @@ const FormStep = () => {
         </div>
       )}
 
+      {/* Step 3: Preferences */}
       {step === 3 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Preferences</h2>
+          
+          {/* Newsletter */}
           <div className="flex items-center justify-between">
             <label className="text-gray-700 dark:text-gray-300" htmlFor="newsletter">
               Subscribe to newsletter
             </label>
-            <div className="relative inline-block w-12 mr-2 align-middle select-none">
+            <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
                 id="newsletter"
                 name="newsletter"
                 checked={formData.newsletter}
                 onChange={handleChange}
-                className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-transform duration-200 ease-in-out"
+                className="sr-only peer"
               />
-              <label
-                htmlFor="newsletter"
-                className={`toggle-label block overflow-hidden h-6 rounded-full cursor-pointer ${formData.newsletter ? 'bg-blue-500' : 'bg-gray-300'}`}
-              ></label>
-            </div>
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500"></div>
+            </label>
           </div>
+          
+          {/* Languages */}
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">
               Preferred Language(s)
             </label>
-            <div className="space-y-2">
+            <div className="grid grid-cols-2 gap-2">
               {languages.map(lang => (
                 <label key={lang} className="flex items-center space-x-2">
                   <input
@@ -202,21 +238,23 @@ const FormStep = () => {
                     value={lang}
                     checked={formData.languages.includes(lang)}
                     onChange={handleChange}
-                    className="text-blue-500"
+                    className="rounded text-blue-500 focus:ring-blue-500"
                   />
                   <span className="text-gray-700 dark:text-gray-300">{lang}</span>
                 </label>
               ))}
             </div>
           </div>
+          
+          {/* Terms */}
           <div>
-            <label className="flex items-center space-x-2">
+            <label className="flex items-start space-x-2">
               <input
                 type="checkbox"
                 name="terms"
                 checked={formData.terms}
                 onChange={handleChange}
-                className="text-blue-500"
+                className="mt-1 rounded text-blue-500 focus:ring-blue-500"
                 required
               />
               <span className="text-gray-700 dark:text-gray-300">
@@ -227,6 +265,7 @@ const FormStep = () => {
         </div>
       )}
 
+      {/* Step 4: Confirmation */}
       {step === 4 && (
         <div className="space-y-4">
           <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Confirmation</h2>
@@ -256,7 +295,7 @@ const FormStep = () => {
               </div>
             </div>
           </div>
-          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+          <div className="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg border border-blue-100 dark:border-blue-800">
             <p className="text-blue-800 dark:text-blue-200">
               Thank you for signing up! Your account has been created successfully.
             </p>
@@ -264,34 +303,46 @@ const FormStep = () => {
         </div>
       )}
 
+      {/* Navigation Buttons */}
       <div className="flex justify-between mt-8">
         {step > 1 && step < 4 && (
           <button
             type="button"
             onClick={prevStep}
-            className="px-6 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 rounded-lg transition-colors duration-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
+            className="px-6 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
           >
             Previous
           </button>
         )}
+        
         {step < 3 && (
           <button
             type="submit"
             disabled={!validateStep()}
-            className={`px-6 py-2 rounded-lg transition-colors duration-200 ml-auto ${validateStep() ? 'bg-blue-500 hover:bg-blue-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'}`}
+            className={`px-6 py-2 rounded-lg transition-colors duration-200 ml-auto ${
+              validateStep() 
+                ? 'bg-blue-500 hover:bg-blue-600 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'
+            }`}
           >
             Next
           </button>
         )}
+        
         {step === 3 && (
           <button
             type="submit"
             disabled={!validateStep()}
-            className={`px-6 py-2 rounded-lg transition-colors duration-200 ml-auto ${validateStep() ? 'bg-green-500 hover:bg-green-600 text-white' : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'}`}
+            className={`px-6 py-2 rounded-lg transition-colors duration-200 ml-auto ${
+              validateStep() 
+                ? 'bg-green-500 hover:bg-green-600 text-white' 
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed dark:bg-gray-700'
+            }`}
           >
             Submit
           </button>
         )}
+        
         {step === 4 && (
           <button
             type="button"
@@ -306,15 +357,23 @@ const FormStep = () => {
         )}
       </div>
       
-      <div className="flex justify-end mt-4">
-        <button
-          type="button"
-          onClick={toggleDarkMode}
-          className="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-lg transition-colors duration-200 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
-        >
-          {darkMode ? '☀️ Light Mode' : '🌙 Dark Mode'}
-        </button>
-      </div>
+      {/* Dark Mode Toggle */}
+      <button
+        type="button"
+        onClick={toggleDarkMode}
+        className="fixed bottom-6 right-6 p-3 rounded-full bg-gray-200 hover:bg-gray-300 text-gray-800 shadow-lg transition-colors duration-300 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-white"
+        aria-label={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+      >
+        {darkMode ? (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+          </svg>
+        )}
+      </button>
     </form>
   );
 };
