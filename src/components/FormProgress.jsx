@@ -1,4 +1,5 @@
-import { useContext } from 'react';
+// src/components/FormProgress.js
+import React, { useContext } from 'react';
 import { FormContext } from '../context/FormContext';
 
 const FormProgress = () => {

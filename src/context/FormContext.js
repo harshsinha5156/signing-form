@@ -1,3 +1,4 @@
+// src/context/FormContext.js
 import { createContext, useState, useEffect, useCallback } from 'react';
 
 export const FormContext = createContext();
@@ -5,9 +6,12 @@ export const FormContext = createContext();
 export const FormProvider = ({ children }) => {
   const [step, setStep] = useState(1);
   const [darkMode, setDarkMode] = useState(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode !== null) return savedMode === 'true';
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (typeof window !== 'undefined') {
+      const savedMode = localStorage.getItem('darkMode');
+      if (savedMode !== null) return savedMode === 'true';
+      return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+    return false;
   });
   
   const [formData, setFormData] = useState({
@@ -22,16 +26,27 @@ export const FormProvider = ({ children }) => {
     terms: false
   });
 
-  // Initialize dark mode on first render
+  // Apply dark mode to entire page
   useEffect(() => {
-    document.documentElement.classList.toggle('dark', darkMode);
-  }, [darkMode]); // Added darkMode as dependency
+    if (darkMode) {
+      document.documentElement.classList.add('dark');
+      document.documentElement.style.colorScheme = 'dark';
+    } else {
+      document.documentElement.classList.remove('dark');
+      document.documentElement.style.colorScheme = 'light';
+    }
+    localStorage.setItem('darkMode', darkMode);
+  }, [darkMode]);
 
   // Load saved form data
   useEffect(() => {
     const savedData = localStorage.getItem('signupFormData');
     if (savedData) {
-      setFormData(JSON.parse(savedData));
+      try {
+        setFormData(JSON.parse(savedData));
+      } catch (e) {
+        console.error('Error parsing form data from localStorage', e);
+      }
     }
   }, []);
 
@@ -40,12 +55,9 @@ export const FormProvider = ({ children }) => {
     localStorage.setItem('signupFormData', JSON.stringify(formData));
   }, [formData]);
 
-  // Memoize toggle function to prevent unnecessary recreations
   const toggleDarkMode = useCallback(() => {
-    const newMode = !darkMode;
-    setDarkMode(newMode);
-    localStorage.setItem('darkMode', newMode);
-  }, [darkMode]);
+    setDarkMode(prevMode => !prevMode);
+  }, []);
 
   const nextStep = () => setStep(step + 1);
   const prevStep = () => setStep(step - 1);
